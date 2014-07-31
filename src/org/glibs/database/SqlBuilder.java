@@ -1,18 +1,11 @@
 package org.glibs.database;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class SqlBuilder {
 	private String tagField;
 	private StringBuffer tables;
-
-	private List<String> fieldNames;
-	private List<String> shortNames;
-
+	private StringBuffer fields;
 	private StringBuffer wheres;
 	private StringBuffer orderBys;
-
 	private String sequence;
 
 	public SqlBuilder() {
@@ -21,14 +14,10 @@ public class SqlBuilder {
 
 	public void clearBuilder() {
 		this.tables = new StringBuffer();
-
-		this.fieldNames = new ArrayList<String>();
-		this.shortNames = new ArrayList<String>();
-
+		this.fields = new StringBuffer();
 		this.wheres = new StringBuffer();
 		this.orderBys = new StringBuffer();
 		this.tagField = "";
-
 		this.sequence = "";
 	}
 
@@ -49,90 +38,55 @@ public class SqlBuilder {
 	}
 
 	public void addTable(String tableName) {
+		if (this.tables.length() > 0) {
+			this.tables = new StringBuffer();
+		}
 		this.tables.append(this.getString(tableName));
 	}
 
 	public void addTable(String tableName, String shortName) {
-		this.tables
-				.append("," + this.getString(tableName) + " as " + shortName);
+		if (this.tables.length() > 0) {
+			this.tables.append(",");
+		}
+		this.tables.append(this.getString(tableName) + " as " + shortName);
 	}
 
 	public void clearTables() {
 		this.tables = new StringBuffer();
 	}
 
-	private String getTables() {
-		return this.tables.toString().substring(1);
-	}
-
 	public void addField(String fieldName) {
-		this.fieldNames.add(fieldName);
+		if (this.fields.length() > 0) {
+			this.fields.append(",");
+		}
+		this.fields.append(this.getString(fieldName));
 	}
 
 	public void addField(String shortName, String fieldName) {
-		this.fieldNames.add(fieldName);
-		this.shortNames.add(shortName);
+		if (this.fields.length() > 0) {
+			this.fields.append(",");
+		}
+		this.fields.append(shortName + "." + this.getString(fieldName));
+	}
+
+	public void addField(String shortName, String fieldName, String nickName) {
+		if (this.fields.length() > 0) {
+			this.fields.append(",");
+		}
+		this.fields.append(shortName + "." + this.getString(fieldName) + " as "
+				+ nickName);
 	}
 
 	public void clearFields() {
-		this.fieldNames = new ArrayList<String>();
-		this.shortNames = new ArrayList<String>();
-	}
-
-	private String getFields() {
-		if (this.fieldNames.size() > 0) {
-			StringBuffer s = new StringBuffer();
-
-			for (int i = 0, j = this.fieldNames.size(); i < j; i++) {
-				s.append(",");
-
-				if (this.shortNames.size() == this.fieldNames.size()) {
-					s.append(this.shortNames.get(i));
-					s.append(".");
-				}
-
-				s.append(this.getString(this.fieldNames.get(i)));
-			}
-
-			return s.toString().substring(1);
-		} else {
-			return "*";
-		}
-	}
-
-	private String getFields(Boolean isUpdate) {
-		if (this.fieldNames.size() > 0) {
-			if (isUpdate) {
-				StringBuffer s = new StringBuffer();
-
-				for (int i = 0, j = this.fieldNames.size(); i < j; i++) {
-					s.append(",");
-					s.append(this.getString(this.fieldNames.get(i)));
-					s.append("=?");
-				}
-
-				return s.toString().substring(1);
-			} else {
-				StringBuffer s = new StringBuffer();
-				StringBuffer v = new StringBuffer();
-
-				for (int i = 0, j = this.fieldNames.size(); i < j; i++) {
-					s.append(",");
-					s.append(this.getString(this.fieldNames.get(i)));
-
-					v.append(",?");
-				}
-
-				return "(" + s.toString().substring(1) + ")values("
-						+ v.toString().substring(1) + ")";
-			}
-		} else {
-			return "";
-		}
+		this.fields = new StringBuffer();
 	}
 
 	public void addOrderBy(String fieldName, Boolean isAsc) {
-		this.orderBys.append("," + this.getString(fieldName) + " ");
+		if (this.orderBys.length() > 0) {
+			this.orderBys.append(",");
+		}
+
+		this.orderBys.append(this.getString(fieldName) + " ");
 
 		if (isAsc) {
 			this.orderBys.append("asc");
@@ -142,8 +96,11 @@ public class SqlBuilder {
 	}
 
 	public void addOrderBy(String shortName, String fieldName, Boolean isAsc) {
-		this.orderBys.append("," + shortName + "." + this.getString(fieldName)
-				+ " ");
+		if (this.orderBys.length() > 0) {
+			this.orderBys.append(",");
+		}
+
+		this.orderBys.append(shortName + "." + this.getString(fieldName) + " ");
 
 		if (isAsc) {
 			this.orderBys.append("asc");
@@ -154,11 +111,6 @@ public class SqlBuilder {
 
 	public void clearOrderBy() {
 		this.orderBys = new StringBuffer();
-	}
-
-	private String getOrderBy() {
-		return this.orderBys.length() > 0 ? this.orderBys.toString().substring(
-				1) : "";
 	}
 
 	public void addWhere(String relation, String leftField, String equals,
@@ -223,26 +175,22 @@ public class SqlBuilder {
 		this.wheres = new StringBuffer();
 	}
 
-	private String getWhere() {
-		return "where" + this.wheres.toString();
-	}
-
 	public String select() {
 		StringBuffer s = new StringBuffer();
 
 		s.append("select ");
-		s.append(this.getFields());
+		s.append(this.fields);
 		s.append(" from ");
-		s.append(this.getTables());
+		s.append(this.tables);
 
 		if (this.wheres.length() > 0) {
-			s.append(" ");
-			s.append(this.getWhere());
+			s.append(" where ");
+			s.append(this.wheres);
 		}
 
 		if (this.orderBys.length() > 0) {
-			s.append(" ");
-			s.append(this.getOrderBy());
+			s.append(" order by ");
+			s.append(this.orderBys);
 		}
 
 		return s.toString();
@@ -252,18 +200,18 @@ public class SqlBuilder {
 		StringBuffer s = new StringBuffer();
 
 		s.append("select ");
-		s.append(this.getFields());
+		s.append(this.fields);
 		s.append(" from ");
-		s.append(this.getTables());
+		s.append(this.tables);
 
 		if (this.wheres.length() > 0) {
-			s.append(" ");
-			s.append(this.getWhere());
+			s.append(" where ");
+			s.append(this.wheres);
 		}
 
 		if (this.orderBys.length() > 0) {
-			s.append(" ");
-			s.append(this.getOrderBy());
+			s.append(" order by ");
+			s.append(this.orderBys);
 		}
 
 		s.append(" limit ? offset ?");
@@ -272,12 +220,24 @@ public class SqlBuilder {
 	}
 
 	public String insert() {
+		StringBuffer v = new StringBuffer();
+		int cnt = this.fields.toString().split(",").length;
+		for (int i = 0; i < cnt; i++) {
+			if (i > 0) {
+				v.append(",");
+			}
+			v.append("?");
+		}
+
 		StringBuffer s = new StringBuffer();
 
 		s.append("insert into ");
-		s.append(this.getTables());
-		s.append(" ");
-		s.append(this.getFields(false));
+		s.append(this.tables);
+		s.append(" (");
+		s.append(this.fields);
+		s.append(")values(");
+		s.append(v);
+		s.append(")");
 
 		return s.toString();
 	}
@@ -286,12 +246,14 @@ public class SqlBuilder {
 		StringBuffer s = new StringBuffer();
 
 		s.append("update ");
-		s.append(this.getTables());
+		s.append(this.tables);
 		s.append(" set ");
-		s.append(this.getFields(true));
-		s.append(" ");
-		s.append(this.getWhere());
+		s.append(this.fields.append("=?").toString().replaceAll(",", "=?,"));
 
+		if (this.wheres.length() > 0) {
+			s.append(" where ");
+			s.append(this.wheres);
+		}
 		return s.toString();
 	}
 
@@ -299,11 +261,11 @@ public class SqlBuilder {
 		StringBuffer s = new StringBuffer();
 
 		s.append("delete from ");
-		s.append(this.getTables());
+		s.append(this.tables);
 
 		if (this.wheres.length() > 0) {
-			s.append(" ");
-			s.append(this.getWhere());
+			s.append(" where ");
+			s.append(this.wheres);
 		}
 
 		return s.toString();
@@ -315,11 +277,11 @@ public class SqlBuilder {
 		s.append("select count(");
 		s.append(this.tagField);
 		s.append(") from ");
-		s.append(this.getTables());
+		s.append(this.tables);
 
 		if (this.wheres.length() > 0) {
-			s.append(" ");
-			s.append(this.getWhere());
+			s.append(" where ");
+			s.append(this.wheres);
 		}
 
 		return s.toString();

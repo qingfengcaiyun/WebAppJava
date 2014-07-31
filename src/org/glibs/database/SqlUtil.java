@@ -160,14 +160,14 @@ public class SqlUtil {
 		}
 	}
 
-	public Integer batch(String sql, List<List<Object>> params) {
+	public Integer batch(String sql, List<List<Object>> paramsList) {
 		try {
 			this.openDB();
 			this.conn.setAutoCommit(false);
 			this.pstmt = this.conn.prepareStatement(sql);
 
-			for (List<Object> param : params) {
-				this.buildStatement(param);
+			for (List<Object> params : paramsList) {
+				this.buildStatement(params);
 				this.pstmt.addBatch();
 			}
 

@@ -20,10 +20,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class MicrosoftExcel {
 
-	public MicrosoftExcel() {
-	}
-
-	public Boolean isExcel2003(String filePath) {
+	public static Boolean isExcel2003(String filePath) {
 		try {
 			new HSSFWorkbook(new FileInputStream(new File(filePath)));
 		} catch (Exception e) {
@@ -32,7 +29,7 @@ public class MicrosoftExcel {
 		return true;
 	}
 
-	public Boolean isExcel2007(String filePath) {
+	public static Boolean isExcel2007(String filePath) {
 		try {
 			new XSSFWorkbook(new FileInputStream(new File(filePath)));
 		} catch (Exception e) {
@@ -41,7 +38,7 @@ public class MicrosoftExcel {
 		return true;
 	}
 
-	public List<Map<String, Object>> importExcel(String filePath)
+	public static List<Map<String, Object>> importExcel(String filePath)
 			throws Exception {
 
 		if (new File(filePath).exists()) {
@@ -117,7 +114,7 @@ public class MicrosoftExcel {
 		}
 	}
 
-	public Boolean exportExcel(List<String> fields,
+	public static Boolean exportExcel(List<String> fields,
 			List<Map<String, Object>> list, String filePath, Boolean isExcel2007)
 			throws Exception {
 

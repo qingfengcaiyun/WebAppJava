@@ -10,10 +10,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.commons.beanutils.BeanUtils;
 
@@ -105,44 +102,6 @@ public class Tools {
 		file = new File(filePath);
 		if (!file.exists()) {
 			file.mkdir();
-		}
-	}
-
-	public static String HashMaptoJSON(Map<String, Object> map) {
-		if (map.isEmpty()) {
-			return "";
-		} else {
-			StringBuffer str = new StringBuffer();
-			Iterator<Entry<String, Object>> iter = map.entrySet().iterator();
-			Entry<String, Object> entry = null;
-			while (iter.hasNext()) {
-				entry = (Entry<String, Object>) iter.next();
-				str.append(",\"");
-				str.append(entry.getKey().toString());
-				str.append("\":");
-				str.append("\"");
-				str.append(entry.getValue().toString());
-				str.append("\"");
-			}
-
-			return "{" + str.toString().substring(1) + "}";
-		}
-	}
-
-	public static String ListMaptoJSON(List<Map<String, Object>> list) {
-		if (list.size() > 0) {
-			StringBuffer str = new StringBuffer();
-			for (int i = 0, j = list.size(); i < j; i++) {
-				if (list.get(i).size() > 0) {
-					str.append(",");
-					str.append(HashMaptoJSON(list.get(i)));
-				} else {
-					continue;
-				}
-			}
-			return "[" + str.toString().substring(1) + "]";
-		} else {
-			return "[]";
 		}
 	}
 

@@ -3,7 +3,7 @@ package org.glibs.database;
 import java.util.List;
 import java.util.Map;
 
-import org.glibs.text.Tools;
+import org.glibs.text.HtmlDo;
 
 public class PageRecords {
 	private int pageSize; // 每页显示的记录数目
@@ -123,7 +123,7 @@ public class PageRecords {
 
 	public void setPageResult(List<Map<String, Object>> pageResult) {
 		this.pageResult = pageResult;
-		this.pageJSON = Tools.ListMaptoJSON(this.pageResult);
+		this.pageJSON = HtmlDo.listToJson(this.pageResult);
 	}
 
 	public String getPageJSON() {
